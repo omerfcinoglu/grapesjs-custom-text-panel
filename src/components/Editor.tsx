@@ -217,7 +217,11 @@ export const Editor: React.FC = () => {
                 '-webkit-text-stroke-color': newStyle.stroke.color,
                 'text-shadow': `${newStyle.shadow.offsetX}px ${newStyle.shadow.offsetY}px ${newStyle.shadow.blur}px ${newStyle.shadow.color}`,
             };
-            selectedComponent.setStyle(style);
+            selectedComponent.setStyle({
+                ...selectedComponent.getStyle(),
+                style
+            }
+            );
         }
     };
 
