@@ -1,9 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
-import grapesjs from 'grapesjs';
-import type { Editor as GrapesEditor } from 'grapesjs';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { TextStyle } from '../types/TextProperties';
+import grapesjs from 'grapesjs';
 import { StylePanel } from './panels/StylePanel';
+import { defaultTextStyle } from '../constants/defaultStyles';
+import { useComponentSelection } from '../hook/useComponentSelection';
+import { setupTextComponents } from '../utils/grapesjs-text-properties';
 
 const EditorContainer = styled.div`
   display: flex;
@@ -12,7 +13,6 @@ const EditorContainer = styled.div`
 
 const GrapesContainer = styled.div`
   flex: 1;
-  position: relative;
 `;
 
 const CustomPanel = styled.div`
@@ -53,174 +53,75 @@ const BlockButton = styled(Button)`
 `;
 
 export const Editor: React.FC = () => {
-    const editorRef = useRef<GrapesEditor | null>(null);
-    const [selectedComponent, setSelectedComponent] = useState<any>(null);
-    const [textStyle, setTextStyle] = useState<TextStyle>({
-        character: {
-            fontSize: '16px',
-            fontWeight: 'normal',
-            fontFamily: 'Arial',
-        },
-        fill: {
-            color: '#000000',
-            opacity: 1,
-        },
-        stroke: {
-            width: 0,
-            color: '#000000',
-            opacity: 1,
-        },
-        shadow: {
-            offsetX: 0,
-            offsetY: 0,
-            blur: 0,
-            color: '#000000',
-            opacity: 1,
-        },
-    });
+    const editorRef = useRef<any>(null);
+    const [editor, setEditor] = useState<any>(null);
+
+    const {
+        selectedComponent,
+        updateComponentStyles,
+        getSelectedComponentStyles
+    } = useComponentSelection(editor);
 
     useEffect(() => {
         if (!editorRef.current) {
-            editorRef.current = grapesjs.init({
+            const editor = grapesjs.init({
                 container: '#gjs',
                 height: '100%',
                 storageManager: false,
                 panels: { defaults: [] },
                 styleManager: { sectors: [] },
-                blockManager: {
-                    appendTo: '#blocks',
-                },
-                plugins: [],
             });
 
-            // Text bloğunu tanımla
-            editorRef.current.BlockManager.add('text-block', {
-                label: 'Text Block',
-                content: {
-                    type: 'text',
-                    content: 'Insert your text here',
-                    style: {
-                        padding: '10px',
-                        margin: '10px',
-                        'min-height': '50px',
-                        'border': '1px dashed #ccc',
-                    }
+            editorRef.current = editor;
+            setEditor(editor);
+            setupTextComponents(editor);
+
+            // İki farklı metin bileşeni oluştur
+            const text1 = {
+                type: 'text',
+                content: 'test text - 1',
+                style: {
+                    padding: '10px',
+                    margin: '10px',
+                    'min-height': '50px',
+                    'font-size': '72px',
+                    'color': '#0000FF', // Mavi
                 }
-            });
+            };
 
-            editorRef.current.on('component:selected', (component) => {
-                setSelectedComponent(component);
-                if (component && component.is('text')) {
-                    const style = component.getStyle();
-                    setTextStyle({
-                        character: {
-                            fontSize: style['font-size'] || '16px',
-                            fontWeight: style['font-weight'] || 'normal',
-                            fontFamily: style['font-family'] || 'Arial',
-                        },
-                        fill: {
-                            color: style['color'] || '#000000',
-                            opacity: style['opacity'] ? parseFloat(style['opacity']) : 1,
-                        },
-                        stroke: {
-                            width: style['-webkit-text-stroke-width'] ?
-                                parseInt(style['-webkit-text-stroke-width']) : 0,
-                            color: style['-webkit-text-stroke-color'] || '#000000',
-                            opacity: 1,
-                        },
-                        shadow: {
-                            offsetX: style['text-shadow'] ?
-                                parseInt(style['text-shadow'].split('px')[0]) : 0,
-                            offsetY: style['text-shadow'] ?
-                                parseInt(style['text-shadow'].split('px')[1]) : 0,
-                            blur: style['text-shadow'] ?
-                                parseInt(style['text-shadow'].split('px')[2]) : 0,
-                            color: style['text-shadow'] ?
-                                style['text-shadow'].split(' ')[3] : '#000000',
-                            opacity: 1,
-                        },
-                    });
-                } else {
-                    setSelectedComponent(null);
-                    setTextStyle({
-                        character: {
-                            fontSize: '16px',
-                            fontWeight: 'normal',
-                            fontFamily: 'Arial',
-                        },
-                        fill: {
-                            color: '#000000',
-                            opacity: 1,
-                        },
-                        stroke: {
-                            width: 0,
-                            color: '#000000',
-                            opacity: 1,
-                        },
-                        shadow: {
-                            offsetX: 0,
-                            offsetY: 0,
-                            blur: 0,
-                            color: '#000000',
-                            opacity: 1,
-                        },
-                    });
+            const text2 = {
+                type: 'text',
+                content: 'test text - 2',
+                style: {
+                    padding: '10px',
+                    margin: '10px',
+                    'min-height': '50px',
+                    'font-size': '72px',
+                    'color': '#FF0000', // Kırmızı
                 }
-            });
+            };
 
-            editorRef.current.on('component:deselected', () => {
-                setSelectedComponent(null);
-                setTextStyle({
-                    character: {
-                        fontSize: '16px',
-                        fontWeight: 'normal',
-                        fontFamily: 'Arial',
-                    },
-                    fill: {
-                        color: '#000000',
-                        opacity: 1,
-                    },
-                    stroke: {
-                        width: 0,
-                        color: '#000000',
-                        opacity: 1,
-                    },
-                    shadow: {
-                        offsetX: 0,
-                        offsetY: 0,
-                        blur: 0,
-                        color: '#000000',
-                        opacity: 1,
-                    },
-                });
-            });
-        }
+            // Bileşenleri ekle
+            editor.addComponents([text1, text2]);
 
-        return () => {
-            if (editorRef.current) {
-                editorRef.current.destroy();
-                editorRef.current = null;
+            // İlk komponenti seç
+            const components = editor.getComponents();
+            if (components.length > 0) {
+                const firstComponent = components.at(0);
+                if (firstComponent) {
+                    editor.select(firstComponent);
+                }
             }
-        };
+        }
     }, []);
 
-    const handleStyleChange = (newStyle: TextStyle) => {
-        setTextStyle(newStyle);
-        if (selectedComponent && selectedComponent.is('text')) {
-
-            selectedComponent.setStyle({
-                ...selectedComponent.getStyle(),
-                'font-size': newStyle.character.fontSize,
-                'font-weight': newStyle.character.fontWeight,
-                'font-family': newStyle.character.fontFamily,
-                'color': newStyle.fill.color,
-                'opacity': newStyle.fill.opacity,
-                '-webkit-text-stroke-width': `${newStyle.stroke.width}px`,
-                '-webkit-text-stroke-color': newStyle.stroke.color,
-                'text-shadow': `${newStyle.shadow.offsetX}px ${newStyle.shadow.offsetY}px ${newStyle.shadow.blur}px ${newStyle.shadow.color}`,
-            });
+    // Stil değişikliklerini izle
+    useEffect(() => {
+        if (selectedComponent) {
+            const styles = getSelectedComponentStyles();
+            console.log('Component styles updated:', styles);
         }
-    };
+    }, [selectedComponent, getSelectedComponentStyles]);
 
     const handleBuild = () => {
         if (editorRef.current) {
@@ -277,14 +178,14 @@ export const Editor: React.FC = () => {
                         Add Text Block
                     </BlockButton>
                 </BlocksPanel>
-                {selectedComponent && selectedComponent.is('text') && (
+                {selectedComponent && (
                     <StylePanel
-                        style={textStyle}
-                        onStyleChange={handleStyleChange}
+                        key={selectedComponent.getId()}
+                        style={getSelectedComponentStyles()}
+                        onStyleChange={updateComponentStyles}
                     />
                 )}
-
             </CustomPanel>
         </EditorContainer>
     );
-}
+};
