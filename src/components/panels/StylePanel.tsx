@@ -5,6 +5,7 @@ import { CharacterPanel } from './CharacterPanel';
 import { FillPanel } from './FillPanel';
 import { StrokePanel } from './StrokePanel';
 import { ShadowPanel } from './ShadowPanel';
+import { BlurPanel } from './BlurPanel';
 
 const PanelContainer = styled.div`
   height: 100%;
@@ -33,6 +34,10 @@ export const StylePanel: React.FC<StylePanelProps> = ({ style, onStyleChange }) 
         onStyleChange({ ...style, shadow });
     };
 
+    const handleBlurChange = (blur: TextStyle['blur']) => {
+        onStyleChange({ ...style, blur });
+    };
+
     return (
         <PanelContainer>
             <CharacterPanel
@@ -50,6 +55,10 @@ export const StylePanel: React.FC<StylePanelProps> = ({ style, onStyleChange }) 
             <ShadowPanel
                 properties={style.shadow}
                 onChange={handleShadowChange}
+            />
+            <BlurPanel
+                properties={style.blur}
+                onChange={handleBlurChange}
             />
         </PanelContainer>
     );

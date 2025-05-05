@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { CharacterProperties } from '../../types/TextProperties';
+import { BlurProperties } from '../../types/TextProperties';
 import { PropertyFactory } from '../properties/PropertyFactory';
 
 const PanelContainer = styled.div`
@@ -14,16 +14,16 @@ const Title = styled.h3`
   color: #333;
 `;
 
-interface CharacterPanelProps {
-    properties: CharacterProperties;
-    onChange: (properties: CharacterProperties) => void;
+interface BlurPanelProps {
+    properties: BlurProperties;
+    onChange: (properties: BlurProperties) => void;
 }
 
-export const CharacterPanel: React.FC<CharacterPanelProps> = ({
+export const BlurPanel: React.FC<BlurPanelProps> = ({
     properties,
     onChange
 }) => {
-    const handlePropertyChange = (key: keyof CharacterProperties, value: any) => {
+    const handlePropertyChange = (key: keyof BlurProperties, value: any) => {
         onChange({
             ...properties,
             [key]: {
@@ -35,14 +35,14 @@ export const CharacterPanel: React.FC<CharacterPanelProps> = ({
 
     return (
         <PanelContainer>
-            <Title>Character Properties</Title>
+            <Title>Blur Properties</Title>
             {Object.entries(properties).map(([key, config]) => (
                 <PropertyFactory
                     key={key}
                     config={config}
-                    onChange={(value) => handlePropertyChange(key as keyof CharacterProperties, value)}
+                    onChange={(value) => handlePropertyChange(key as keyof BlurProperties, value)}
                 />
             ))}
         </PanelContainer>
     );
-}; 
+};
