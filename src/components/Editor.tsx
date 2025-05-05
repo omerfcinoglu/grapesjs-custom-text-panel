@@ -207,7 +207,9 @@ export const Editor: React.FC = () => {
     const handleStyleChange = (newStyle: TextStyle) => {
         setTextStyle(newStyle);
         if (selectedComponent && selectedComponent.is('text')) {
-            const style = {
+
+            selectedComponent.setStyle({
+                ...selectedComponent.getStyle(),
                 'font-size': newStyle.character.fontSize,
                 'font-weight': newStyle.character.fontWeight,
                 'font-family': newStyle.character.fontFamily,
@@ -216,12 +218,7 @@ export const Editor: React.FC = () => {
                 '-webkit-text-stroke-width': `${newStyle.stroke.width}px`,
                 '-webkit-text-stroke-color': newStyle.stroke.color,
                 'text-shadow': `${newStyle.shadow.offsetX}px ${newStyle.shadow.offsetY}px ${newStyle.shadow.blur}px ${newStyle.shadow.color}`,
-            };
-            selectedComponent.setStyle({
-                ...selectedComponent.getStyle(),
-                style
-            }
-            );
+            });
         }
     };
 
