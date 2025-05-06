@@ -1,23 +1,25 @@
 // src/hooks/useComponentSelection.ts
 import { useState, useEffect, useCallback } from "react";
-import { TextStyle } from "../types/TextProperties";
-import { defaultTextStyle } from "../constants/defaultStyles";
 import {
-  grapesToTextStyle,
-  textStyleToGrapes,
+  ComponentStyles,
+  createDefaultComponentStyles,
+} from "../types/ComponentStyles";
+import {
+  grapesToComponentStyles,
+  componentStylesToGrapes,
 } from "../utils/styleTransformers";
 
 export const useComponentSelection = (editor: any) => {
   const [selectedComponent, setSelectedComponent] = useState<any>(null);
   const [componentStyles, setComponentStyles] = useState<
-    Map<string, TextStyle>
+    Map<string, ComponentStyles>
   >(new Map());
 
   const handleSelect = useCallback((options: any) => {
     const component = options.component || options;
     console.log("Selected component:", component);
 
-    if (!component || !component.is("text")) {
+    if (!component) {
       setSelectedComponent(null);
       return;
     }
@@ -26,9 +28,9 @@ export const useComponentSelection = (editor: any) => {
     const componentId = component.getId();
 
     const currentStyles = component.getStyle();
-    const textStyles = grapesToTextStyle(currentStyles);
+    const styles = grapesToComponentStyles(currentStyles);
 
-    setComponentStyles((prev) => new Map(prev).set(componentId, textStyles));
+    setComponentStyles((prev) => new Map(prev).set(componentId, styles));
   }, []);
 
   const handleDeselect = useCallback(() => {
@@ -41,7 +43,6 @@ export const useComponentSelection = (editor: any) => {
 
     console.log("Setting up selection listeners");
 
-    // Component selection events
     editor.on("component:selected", handleSelect);
     editor.on("component:deselect", handleDeselect);
     editor.on("component:update", (component: any) => {
@@ -58,7 +59,7 @@ export const useComponentSelection = (editor: any) => {
   }, [editor, handleSelect, handleDeselect, selectedComponent]);
 
   const updateComponentStyles = useCallback(
-    (newStyles: TextStyle) => {
+    (newStyles: ComponentStyles) => {
       if (!selectedComponent) return;
 
       const componentId = selectedComponent.getId();
@@ -66,34 +67,29 @@ export const useComponentSelection = (editor: any) => {
 
       setComponentStyles((prev) => new Map(prev).set(componentId, newStyles));
 
-      const grapesStyles = textStyleToGrapes(newStyles);
+      const grapesStyles = componentStylesToGrapes(newStyles);
       selectedComponent.setStyle(grapesStyles);
     },
     [selectedComponent]
   );
 
-  const getSelectedComponentStyles = useCallback((): TextStyle => {
-    if (!selectedComponent) return defaultTextStyle;
+  const getSelectedComponentStyles = useCallback((): ComponentStyles => {
+    if (!selectedComponent) return createDefaultComponentStyles();
 
     const componentId = selectedComponent.getId();
     const styles = componentStyles.get(componentId);
 
     if (!styles) {
       const currentStyles = selectedComponent.getStyle();
-      const textStyles = grapesToTextStyle(currentStyles);
-      setComponentStyles((prev) => new Map(prev).set(componentId, textStyles));
-      return textStyles;
+      const componentStyles = grapesToComponentStyles(currentStyles);
+      setComponentStyles((prev) =>
+        new Map(prev).set(componentId, componentStyles)
+      );
+      return componentStyles;
     }
 
     return styles;
   }, [selectedComponent, componentStyles]);
-
-  useEffect(() => {
-    if (selectedComponent) {
-      console.log("Selected Component ID:", selectedComponent.getId());
-      console.log("Current Styles:", getSelectedComponentStyles());
-    }
-  }, [selectedComponent, getSelectedComponentStyles]);
 
   return {
     selectedComponent,

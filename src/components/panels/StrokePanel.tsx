@@ -8,15 +8,11 @@ const PanelContainer = styled.div`
   border-bottom: 1px solid #ddd;
 `;
 
-const Title = styled.h3`
-  margin: 0 0 16px;
-  font-size: 14px;
-  color: #333;
-`;
-
 interface StrokePanelProps {
     properties: StrokeRow;
     onChange: (properties: StrokeRow) => void;
+    onToggle: () => void;
+    isVisible: boolean;
 }
 
 export const StrokePanel: React.FC<StrokePanelProps> = ({
@@ -35,7 +31,6 @@ export const StrokePanel: React.FC<StrokePanelProps> = ({
 
     return (
         <PanelContainer>
-            <Title>Stroke Properties</Title>
             {Object.entries(properties).map(([key, config]) => (
                 <PropertyFactory
                     key={key}

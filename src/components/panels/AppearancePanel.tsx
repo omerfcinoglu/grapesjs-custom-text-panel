@@ -1,25 +1,23 @@
 import React from 'react';
 import styled from 'styled-components';
-import { ShadowRow } from '../../types/TextProperties';
 import { PropertyFactory } from '../properties/PropertyFactory';
+import { ApperanceStyle } from '../../types/AppearanceProperties';
 
 const PanelContainer = styled.div`
   padding: 16px;
   border-bottom: 1px solid #ddd;
 `;
 
-interface ShadowPanelProps {
-    properties: ShadowRow;
-    onChange: (properties: ShadowRow) => void;
-    onToggle: () => void;
-    isVisible: boolean;
+interface AppearancePanelProps {
+    properties: ApperanceStyle;
+    onChange: (properties: ApperanceStyle) => void;
 }
 
-export const ShadowPanel: React.FC<ShadowPanelProps> = ({
+export const AppearancePanel: React.FC<AppearancePanelProps> = ({
     properties,
     onChange
 }) => {
-    const handlePropertyChange = (key: keyof ShadowRow, value: any) => {
+    const handlePropertyChange = (key: keyof ApperanceStyle, value: any) => {
         onChange({
             ...properties,
             [key]: {
@@ -35,7 +33,7 @@ export const ShadowPanel: React.FC<ShadowPanelProps> = ({
                 <PropertyFactory
                     key={key}
                     config={config}
-                    onChange={(value) => handlePropertyChange(key as keyof ShadowRow, value)}
+                    onChange={(value) => handlePropertyChange(key as keyof ApperanceStyle, value)}
                 />
             ))}
         </PanelContainer>

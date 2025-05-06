@@ -8,15 +8,11 @@ const PanelContainer = styled.div`
   border-bottom: 1px solid #ddd;
 `;
 
-const Title = styled.h3`
-  margin: 0 0 16px;
-  font-size: 14px;
-  color: #333;
-`;
-
 interface BlurPanelProps {
     properties: BlurProperties;
     onChange: (properties: BlurProperties) => void;
+    onToggle: () => void;
+    isVisible: boolean;
 }
 
 export const BlurPanel: React.FC<BlurPanelProps> = ({
@@ -35,7 +31,6 @@ export const BlurPanel: React.FC<BlurPanelProps> = ({
 
     return (
         <PanelContainer>
-            <Title>Blur Properties</Title>
             {Object.entries(properties).map(([key, config]) => (
                 <PropertyFactory
                     key={key}
