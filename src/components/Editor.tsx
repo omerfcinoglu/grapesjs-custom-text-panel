@@ -1,10 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import grapesjs from 'grapesjs';
-import { StylePanel } from './panels/StylePanel';
-import { defaultTextStyle } from '../constants/defaultStyles';
-import { useComponentSelection } from '../hook/useComponentSelection';
-import { setupTextComponents } from '../utils/grapesjs-text-properties';
+import { TextPropertiesPanel } from './panels/TextPropertiesPanel';
 
 const EditorContainer = styled.div`
   display: flex;
@@ -55,12 +52,7 @@ const BlockButton = styled(Button)`
 export const Editor: React.FC = () => {
     const editorRef = useRef<any>(null);
     const [editor, setEditor] = useState<any>(null);
-
-    const {
-        selectedComponent,
-        updateComponentStyles,
-        getSelectedComponentStyles
-    } = useComponentSelection(editor);
+    const [selectedComponent, setSelectedComponent] = useState<any>(null);
 
     useEffect(() => {
         if (!editorRef.current) {
@@ -74,9 +66,7 @@ export const Editor: React.FC = () => {
 
             editorRef.current = editor;
             setEditor(editor);
-            setupTextComponents(editor);
 
-            // İki farklı metin bileşeni oluştur
             const text1 = {
                 type: 'text',
                 content: 'test text - 1',
@@ -104,31 +94,22 @@ export const Editor: React.FC = () => {
             // Bileşenleri ekle
             editor.addComponents([text1, text2]);
 
-            // İlk komponenti seç
-            const components = editor.getComponents();
-            if (components.length > 0) {
-                const firstComponent = components.at(0);
-                if (firstComponent) {
-                    editor.select(firstComponent);
-                }
-            }
+            // Handle component selection
+            editor.on('component:selected', (component: any) => {
+                setSelectedComponent(component);
+            });
+
+            editor.on('component:deselected', () => {
+                setSelectedComponent(null);
+            });
         }
     }, []);
-
-    // Stil değişikliklerini izle
-    useEffect(() => {
-        if (selectedComponent) {
-            const styles = getSelectedComponentStyles();
-            console.log('Component styles updated:', styles);
-        }
-    }, [selectedComponent, getSelectedComponentStyles]);
 
     const handleBuild = () => {
         if (editorRef.current) {
             const html = editorRef.current.getHtml();
             const css = editorRef.current.getCss();
 
-            // HTML ve CSS'i birleştir
             const fullHtml = `
 <!DOCTYPE html>
 <html>
@@ -142,7 +123,6 @@ export const Editor: React.FC = () => {
 </body>
 </html>`;
 
-            // Yeni pencerede aç
             const win = window.open('', '_blank');
             if (win) {
                 win.document.write(fullHtml);
@@ -179,10 +159,11 @@ export const Editor: React.FC = () => {
                     </BlockButton>
                 </BlocksPanel>
                 {selectedComponent && (
-                    <StylePanel
-                        key={selectedComponent.getId()}
-                        style={getSelectedComponentStyles()}
-                        onStyleChange={updateComponentStyles}
+                    <TextPropertiesPanel
+                        component={selectedComponent}
+                        onChange={(styles) => {
+                            console.log('Text styles updated:', styles);
+                        }}
                     />
                 )}
             </CustomPanel>
